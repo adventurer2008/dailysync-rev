@@ -76,7 +76,7 @@ const runMfaLogin = async () => {
     });
 
     if (exitCode !== 0) {
-        throw new Error(`MFA login failed. Make sure Python has garth installed: ${python} -m pip install garth`);
+        throw new Error(`MFA login failed with exit code ${exitCode}. See the Python error above for the Garmin response.`);
     }
 
     const token = parseLoginResult(stdout);
@@ -95,4 +95,3 @@ runMfaLogin().catch((error) => {
     console.error(error);
     process.exit(1);
 });
-
