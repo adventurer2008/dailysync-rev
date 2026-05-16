@@ -14,6 +14,7 @@ const core = require('@actions/core');
 import _ from 'lodash';
 import { getSessionFromDB, initDB, saveSessionToDB, updateSessionToDB } from './sqlite';
 import { getSessionFromEnv } from './garmin_session_env';
+import { getGaminGlobalDiClient } from './garmin_global_di';
 
 const CryptoJS = require('crypto-js');
 const fs = require('fs');
@@ -109,7 +110,10 @@ export const migrateGarminCN2GarminGlobal = async (count = 200) => {
 
 export const syncGarminCN2GarminGlobal = async () => {
     const clientCN = await getGaminCNClient();
-    const clientGlobal = await getGaminGlobalClient();
+    const clientGlobal = await getGaminGlobalDiClient().catch(async (error) => {
+        console.log(`GarminGlobalDI unavailable: ${error.message}`);
+        return getGaminGlobalClient();
+    });
 
     let cnActs = await clientCN.getActivities(0, Number(GARMIN_SYNC_NUM));
     const globalActs = await clientGlobal.getActivities(0, 1);

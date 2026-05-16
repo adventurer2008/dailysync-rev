@@ -29,3 +29,4 @@ _site/
 .idea
 
 config.yaml
+db/garmin_global_di_session.json
