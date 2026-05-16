@@ -20,6 +20,113 @@
 如果你不熟悉代码，强烈推荐使用这个版本，在网页上填入账号点击就能同步数据，简洁好用。
 [https://dailysync.vyzt.dev/](https://dailysync.vyzt.dev/)
 
+## Windows 定时增量同步：中国区 -> 国际区
+
+如果你的目标是把佳明中国区运动记录定时增量同步到佳明国际区，推荐在一台长期在线的 Windows 机器上运行。当前可用方案是：
+
+- 中国区使用 `yarn login_cn` 进行一次交互式登录，支持短信/多因素验证码，并把 session 保存到 `db/garmin.db`
+- 国际区使用 `yarn login_global_di` 进行一次浏览器登录，保存 DI OAuth2 token 到 `db/garmin_global_di_session.json`
+- 日常定时任务只需要运行 `yarn sync_cn`
+
+### 1. 安装依赖
+
+安装 Node.js、Git、Python 3.12+ 后，在 PowerShell 中执行：
+
+```powershell
+cd D:\code
+git clone https://github.com/adventurer2008/dailysync-rev.git
+cd D:\code\dailysync-rev
+corepack enable
+yarn
+python -m pip install -r requirements.txt
+python -m playwright install chromium
+```
+
+### 2. 配置账号
+
+在项目根目录创建 `.env`：
+
+```powershell
+notepad .env
+```
+
+填写：
+
+```env
+GARMIN_USERNAME=佳明中国区账号
+GARMIN_PASSWORD=佳明中国区密码
+GARMIN_GLOBAL_USERNAME=佳明国际区账号
+GARMIN_GLOBAL_PASSWORD=佳明国际区密码
+```
+
+不要在行尾加分号。
+
+### 3. 首次登录
+
+中国区如果触发短信验证码，按提示输入验证码：
+
+```powershell
+yarn login_cn
+```
+
+国际区使用 DI 登录方式，浏览器窗口会打开，按页面完成登录：
+
+```powershell
+yarn login_global_di
+```
+
+首次登录成功后，请保留以下文件：
+
+```text
+db/garmin.db
+db/garmin_global_di_session.json
+```
+
+如果这些文件被删除，需要重新登录。
+
+### 4. 手动同步测试
+
+```powershell
+yarn sync_cn
+```
+
+正常日志中应能看到：
+
+```text
+GarminCN: login by saved session
+Garmin userInfo global DI ...
+```
+
+`sync_cn` 会读取中国区最近活动，并和国际区最新活动的 `startTimeLocal` 比较，只上传国际区没有的新活动。不要把 `migrate_garmin_cn_to_global` 放进定时任务。
+
+### 5. Windows 任务计划程序
+
+创建脚本 `D:\code\dailysync-rev\sync_cn.ps1`：
+
+```powershell
+$Log = "D:\code\dailysync-rev\sync.log"
+Add-Content $Log "===== START $(Get-Date) ====="
+Set-Location "D:\code\dailysync-rev"
+yarn sync_cn >> $Log 2>&1
+Add-Content $Log "===== END $(Get-Date) ExitCode=$LASTEXITCODE ====="
+exit $LASTEXITCODE
+```
+
+在“任务计划程序”中新建任务：
+
+- 程序：`powershell.exe`
+- 参数：`-NoProfile -ExecutionPolicy Bypass -File "D:\code\dailysync-rev\sync_cn.ps1"`
+- 起始于：`D:\code\dailysync-rev`
+- 触发器：每天白天开始，例如 06:00，重复间隔 30 分钟，持续 16 小时
+- 设置：如果任务已在运行，选择“不要启动新实例”
+- 设置：任务运行超过 20 分钟则停止
+
+查看日志：
+
+```powershell
+Get-Content D:\code\dailysync-rev\sync.log -Tail 100
+```
+
 ## 其他仓库备份
 gitlab: 
 [https://gitlab.com/gooin/dailysync](https://gitlab.com/gooin/dailysync)
@@ -48,6 +155,10 @@ yarn sync_cn
 同步国际区到中国区
 ```shell
 yarn sync_global
+```
+国际区 DI 登录（国际区登录被限流或旧 OAuth 登录失败时推荐先运行一次）
+```shell
+yarn login_global_di
 ```
 迁移历史数据：中国区到国际区
 ```shell
