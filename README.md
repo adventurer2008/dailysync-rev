@@ -13,32 +13,7 @@
 
 [![](https://img.shields.io/badge/-Telegram-%2326A5E4?style=flat-square&logo=telegram&logoColor=ffffff)](https://t.me/garmindailysync)
 
-## 【2026-05说明】
-added a new section near the top:
-
-Windows 定时增量同步：中国区 -> 国际区
-It documents:
-
-yarn login_cn
-
-yarn login_global_di
-
-yarn sync_cn
-
-.env format
-
-required session files to preserve
-
-Windows Task Scheduler setup
-
-sync log script
-
-duplicate-sync precautions
-
-Docker note for login_global_di
-
-## 【2025-12说明】开启了ECG功能的说明
-开通了ECG功能的佳明账号，因为登录佳明时需要提供验证码，开通ECG后，这个验证码无法关闭，github上要中途要输入一次验证码，本同步脚本无法支持，下方的Web版本做了兼容，可以使用。 
+## 【2026-05说明】Windows 定时增量同步：中国区 -> 国际区
 
 ## Web版本
 如果你不熟悉代码，强烈推荐使用这个版本，在网页上填入账号点击就能同步数据，简洁好用。
