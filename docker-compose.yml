@@ -26,3 +26,33 @@ services:
     profiles:
       - tools
     command: yarn export_garmin_sessions
+
+  login-cn:
+    image: 'daily-sync:latest'
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./db:/app/db
+    profiles:
+      - tools
+    stdin_open: true
+    tty: true
+    command: yarn login_cn
+
+  login-global:
+    image: 'daily-sync:latest'
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./db:/app/db
+    profiles:
+      - tools
+    stdin_open: true
+    tty: true
+    command: yarn login_global
