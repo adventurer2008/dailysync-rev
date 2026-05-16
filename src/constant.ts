@@ -1,3 +1,7 @@
+import { loadDotEnv } from './utils/env';
+
+loadDotEnv();
+
 export const FILE_SUFFIX = {
     FIT: 'fit',
     GPX: 'gpx',

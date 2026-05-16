@@ -1,29 +1,4 @@
-import fs from 'fs';
-
-const loadDotEnv = () => {
-    if (!fs.existsSync('.env')) {
-        return;
-    }
-
-    const lines = fs.readFileSync('.env', 'utf8').split(/\r?\n/);
-    lines.forEach((line) => {
-        const trimmedLine = line.trim();
-        if (!trimmedLine || trimmedLine.startsWith('#')) {
-            return;
-        }
-
-        const separatorIndex = trimmedLine.indexOf('=');
-        if (separatorIndex === -1) {
-            return;
-        }
-
-        const name = trimmedLine.slice(0, separatorIndex).trim();
-        const value = trimmedLine.slice(separatorIndex + 1).trim().replace(/;$/, '');
-        if (!process.env[name]) {
-            process.env[name] = value;
-        }
-    });
-};
+import { loadDotEnv } from './utils/env';
 
 const printSecret = (name: string, value: Record<string, any>) => {
     console.log(`${name}=${JSON.stringify(value)}`);
