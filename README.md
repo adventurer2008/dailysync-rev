@@ -98,7 +98,57 @@ Garmin userInfo global DI ...
 
 `sync_cn` 会读取中国区最近活动，并和国际区最新活动的 `startTimeLocal` 比较，只上传国际区没有的新活动。不要把 `migrate_garmin_cn_to_global` 放进定时任务。
 
-### 5. Windows 任务计划程序
+### 5. 本地归档所有历史活动
+
+如果需要在本地保留一份完整原始数据，先运行中国区归档：
+
+```powershell
+yarn archive_cn
+```
+
+归档会分页读取佳明中国区活动，下载原始 ZIP/FIT 文件，并记录元数据和下载状态。默认数据目录：
+
+```text
+data/
+  archive.db
+  garmin-cn/
+    raw/
+      2026/
+        2026-05-16_07_11_15_123456789_活动名称/
+          123456789.zip
+          ACTIVITY.fit
+    metadata/
+      activities.jsonl
+```
+
+归档是增量的。已经写入 `data/archive.db` 的 `activityId` 下次会跳过，不会重复下载。
+
+首次测试建议限制数量，例如只归档最近 10 条：
+
+```powershell
+$env:GARMIN_ARCHIVE_MAX_ACTIVITIES="10"
+yarn archive_cn
+Remove-Item Env:GARMIN_ARCHIVE_MAX_ACTIVITIES
+```
+
+默认每页读取 50 条。可以调整：
+
+```powershell
+$env:GARMIN_ARCHIVE_PAGE_SIZE="20"
+```
+
+首次完整归档完成后，日常定时建议只检查最近一小批活动，再同步：
+
+```powershell
+$env:GARMIN_ARCHIVE_MAX_ACTIVITIES="20"
+yarn archive_cn
+Remove-Item Env:GARMIN_ARCHIVE_MAX_ACTIVITIES
+yarn sync_cn
+```
+
+这样即使上传国际区失败，中国区原始活动也已经先保存在本地，同时避免每 15 或 30 分钟都扫描完整历史。
+
+### 6. Windows 任务计划程序
 
 创建脚本 `D:\code\dailysync-rev\sync_cn.ps1`：
 
@@ -106,6 +156,9 @@ Garmin userInfo global DI ...
 $Log = "D:\code\dailysync-rev\sync.log"
 Add-Content $Log "===== START $(Get-Date) ====="
 Set-Location "D:\code\dailysync-rev"
+$env:GARMIN_ARCHIVE_MAX_ACTIVITIES="20"
+yarn archive_cn >> $Log 2>&1
+Remove-Item Env:GARMIN_ARCHIVE_MAX_ACTIVITIES
 yarn sync_cn >> $Log 2>&1
 Add-Content $Log "===== END $(Get-Date) ExitCode=$LASTEXITCODE ====="
 exit $LASTEXITCODE

@@ -8,6 +8,8 @@
     "rq": "ts-node src/rq.ts",
     "sync_cn": "ts-node src/sync_garmin_cn_to_global.ts",
     "sync_global": "ts-node src/sync_garmin_global_to_cn.ts",
+    "archive_cn": "ts-node src/archive_garmin_cn.ts",
+    "archive_global": "ts-node src/archive_garmin_global.ts",
     "login_cn": "ts-node src/login_garmin_with_mfa.ts CN",
     "login_global": "ts-node src/login_garmin_with_mfa.ts GLOBAL",
     "login_global_di": "ts-node src/login_garmin_global_di.ts",

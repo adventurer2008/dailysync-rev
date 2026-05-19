@@ -30,3 +30,4 @@ _site/
 
 config.yaml
 db/garmin_global_di_session.json
+data/
